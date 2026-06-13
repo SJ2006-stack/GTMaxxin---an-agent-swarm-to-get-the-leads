@@ -1,0 +1,8 @@
+packages:
+  - "."
+
+allowBuilds:
+  '@openrouter/sdk': false
+  esbuild: true
+  sharp: true
+  workerd: true

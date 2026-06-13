@@ -1,0 +1,29 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "prospect-swarm",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-06-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "OPENROUTER_MODEL": "openrouter/free",
+    "LANGCHAIN_TRACING_V2": "false",
+    "LANGCHAIN_PROJECT": "prospect-swarm",
+    "MOCK_LLM": "true",
+    "MOCK_TOOLS": "true"
+  },
+  "secrets": {
+    "required": ["OPENROUTER_API_KEY"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "RUNS_KV",
+      "id": "1728945787f5471f86613ebd032715da"
+    }
+  ]
+}
