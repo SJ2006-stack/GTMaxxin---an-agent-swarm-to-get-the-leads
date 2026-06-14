@@ -302,13 +302,15 @@ export function useReportStream(runId: string): UseReportStreamResult {
       }
     });
 
+    // Safety net only: the SSE route already polls the store server-side, so
+    // this fallback fires solely when the live stream goes quiet for a while.
     const pollFallback = setInterval(() => {
       if (isCompleteRef.current) return;
-      if (Date.now() - lastUpdateAtRef.current < 3000) return;
+      if (Date.now() - lastUpdateAtRef.current < 5000) return;
       pollRunState().catch((err) =>
         setError(err instanceof Error ? err.message : "Poll failed")
       );
-    }, 1000);
+    }, 2000);
 
     return () => {
       clearInterval(pollFallback);

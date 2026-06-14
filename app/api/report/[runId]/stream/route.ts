@@ -3,10 +3,9 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { KVNamespace } from "@cloudflare/workers-types";
 import {
   getRun,
-  getRunEvents,
-  getRunLogs,
   subscribeToRun,
   bindRunsKV,
+  type RunRecord,
 } from "@/server/runs/store";
 import { formatSSE } from "@/swarm/events";
 
@@ -50,8 +49,9 @@ export async function GET(
 
   const stream = new ReadableStream({
     async start(controller) {
-      const pushBuffered = async () => {
-        const events = await getRunEvents(runId);
+      // Drains a single already-fetched record, avoiding extra KV reads per tick.
+      const pushBuffered = (record: RunRecord) => {
+        const events = record.events ?? [];
         for (let i = lastEventCount; i < events.length; i++) {
           controller.enqueue(
             encoder.encode(formatSSE({ type: "agent_status", data: events[i] }))
@@ -59,7 +59,7 @@ export async function GET(
         }
         lastEventCount = events.length;
 
-        const logs = await getRunLogs(runId);
+        const logs = record.logs ?? [];
         for (let i = lastLogCount; i < logs.length; i++) {
           controller.enqueue(
             encoder.encode(formatSSE({ type: "agent_log", data: logs[i] }))
@@ -68,9 +68,9 @@ export async function GET(
         lastLogCount = logs.length;
       };
 
-      await pushBuffered();
+      pushBuffered(run);
 
-      const current = await getRun(runId);
+      const current = run;
       if (current?.status === "done" && current.state?.report) {
         controller.enqueue(
           encoder.encode(formatSSE({ type: "report_ready", data: { run_id: runId } }))
@@ -127,7 +127,7 @@ export async function GET(
           return;
         }
 
-        await pushBuffered();
+        pushBuffered(latest);
 
         if (latest.status === "done" && latest.state?.report) {
           controller.enqueue(
@@ -151,7 +151,7 @@ export async function GET(
           controller.close();
           unsubscribe?.();
         }
-      }, 250);
+      }, 1000);
     },
     cancel() {
       unsubscribe?.();

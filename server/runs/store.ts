@@ -14,27 +14,32 @@ export type RunRecord = {
   events: AgentStatusEvent[];
   logs: AgentLogEvent[];
   error?: string;
+  demo_mode?: boolean;
   created_at: string;
   updated_at: string;
 };
 
-const memoryRuns = new Map<string, RunRecord>();
-const streamListeners = new Map<string, Set<(event: SwarmStreamEvent) => void>>();
-const writeQueues = new Map<string, Promise<void>>();
-let boundKV: KVNamespace | null | undefined;
+/**
+ * Persistence model
+ * -----------------
+ * A swarm run emits many status/log events. Re-reading and re-serializing the
+ * entire (large) run record to KV on every single event is O(n┬▓) write
+ * amplification and will hit Cloudflare KV's ~1 write/sec-per-key limit.
+ *
+ * Instead, the isolate that owns the run keeps the authoritative record in
+ * memory (`liveRuns`), mutates it in place, and flushes to KV on a throttle.
+ * Reader isolates (the SSE/stream route) never populate `liveRuns`, so their
+ * reads always go straight to KV and stay fresh.
+ */
+const FLUSH_INTERVAL_MS = 750;
 
-function enqueueRunWrite<T>(runId: string, operation: () => Promise<T>): Promise<T> {
-  const previous = writeQueues.get(runId) ?? Promise.resolve();
-  const result = previous.then(operation);
-  writeQueues.set(
-    runId,
-    result.then(
-      () => undefined,
-      () => undefined
-    )
-  );
-  return result;
-}
+const memoryRuns = new Map<string, RunRecord>();
+const liveRuns = new Map<string, RunRecord>();
+const flushTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const flushChains = new Map<string, Promise<void>>();
+const dirtyRuns = new Set<string>();
+const streamListeners = new Map<string, Set<(event: SwarmStreamEvent) => void>>();
+let boundKV: KVNamespace | null | undefined;
 
 export function bindRunsKV(kv: KVNamespace | null): void {
   boundKV = kv;
@@ -70,26 +75,79 @@ async function getRunsKV(): Promise<KVNamespace | null> {
   return null;
 }
 
-async function readRun(runId: string): Promise<RunRecord | undefined> {
+/** Always returns fresh data: cached record for the writer isolate, KV otherwise. */
+async function readFresh(runId: string): Promise<RunRecord | undefined> {
+  const cached = liveRuns.get(runId);
+  if (cached) return cached;
+
   const kv = await getRunsKV();
   if (kv) {
-    const record = await kv.get(runKey(runId), "json");
-    const parsed = record as RunRecord | null;
-    if (parsed && !parsed.logs) parsed.logs = [];
-    return parsed ?? undefined;
+    const record = (await kv.get(runKey(runId), "json")) as RunRecord | null;
+    if (record && !record.logs) record.logs = [];
+    return record ?? undefined;
   }
+
   const mem = memoryRuns.get(runId);
   if (mem && !mem.logs) mem.logs = [];
   return mem;
 }
 
-async function writeRun(record: RunRecord): Promise<void> {
+async function persist(record: RunRecord): Promise<void> {
   const kv = await getRunsKV();
   if (kv) {
     await kv.put(runKey(record.run_id), JSON.stringify(record));
     return;
   }
   memoryRuns.set(record.run_id, record);
+}
+
+/** Writes the current in-memory record to KV, serializing puts per run. */
+function flush(runId: string): Promise<void> {
+  const record = liveRuns.get(runId);
+  if (!record) return Promise.resolve();
+  dirtyRuns.delete(runId);
+
+  const previous = flushChains.get(runId) ?? Promise.resolve();
+  const next = previous.then(() => persist(record)).catch(() => undefined);
+  flushChains.set(runId, next);
+  return next;
+}
+
+/** Marks the run dirty and ensures a single pending throttled flush. */
+function scheduleFlush(runId: string): void {
+  dirtyRuns.add(runId);
+  if (flushTimers.has(runId)) return;
+
+  const timer = setTimeout(() => {
+    flushTimers.delete(runId);
+    if (dirtyRuns.has(runId)) void flush(runId);
+  }, FLUSH_INTERVAL_MS);
+  flushTimers.set(runId, timer);
+}
+
+/** Cancels any pending throttle and persists immediately, awaiting completion. */
+async function forceFlush(runId: string): Promise<void> {
+  const timer = flushTimers.get(runId);
+  if (timer) {
+    clearTimeout(timer);
+    flushTimers.delete(runId);
+  }
+  await flush(runId);
+  await (flushChains.get(runId) ?? Promise.resolve());
+}
+
+function releaseRun(runId: string): void {
+  const timer = flushTimers.get(runId);
+  if (timer) clearTimeout(timer);
+  flushTimers.delete(runId);
+  flushChains.delete(runId);
+  dirtyRuns.delete(runId);
+  liveRuns.delete(runId);
+}
+
+function ownRecord(record: RunRecord): RunRecord {
+  liveRuns.set(record.run_id, record);
+  return record;
 }
 
 function notifyListeners(runId: string, event: SwarmStreamEvent): void {
@@ -102,61 +160,65 @@ function notifyListeners(runId: string, event: SwarmStreamEvent): void {
 }
 
 export async function createRun(runId: string): Promise<RunRecord> {
-  return enqueueRunWrite(runId, async () => {
-    const now = new Date().toISOString();
-    const record: RunRecord = {
-      run_id: runId,
-      status: "pending",
-      events: [],
-      logs: [],
-      created_at: now,
-      updated_at: now,
-    };
-    await writeRun(record);
-    return record;
-  });
+  const now = new Date().toISOString();
+  const record: RunRecord = {
+    run_id: runId,
+    status: "pending",
+    events: [],
+    logs: [],
+    created_at: now,
+    updated_at: now,
+  };
+  ownRecord(record);
+  await persist(record);
+  return record;
 }
 
 export async function getRun(runId: string): Promise<RunRecord | undefined> {
-  return readRun(runId);
+  return readFresh(runId);
 }
 
 export async function updateRun(
   runId: string,
   patch: Partial<RunRecord>
 ): Promise<RunRecord | undefined> {
-  return enqueueRunWrite(runId, async () => {
-    const existing = await readRun(runId);
-    if (!existing) return undefined;
+  let record = liveRuns.get(runId);
+  if (!record) {
+    const fresh = await readFresh(runId);
+    if (!fresh) return undefined;
+    record = ownRecord(fresh);
+  }
 
-    const updated: RunRecord = {
-      ...existing,
-      ...patch,
-      updated_at: new Date().toISOString(),
-    };
-    await writeRun(updated);
-    return updated;
-  });
+  Object.assign(record, patch, { updated_at: new Date().toISOString() });
+
+  const isTerminal = record.status === "done" || record.status === "error";
+  await forceFlush(runId);
+  if (isTerminal) releaseRun(runId);
+  return record;
 }
 
 export async function appendEvent(
   runId: string,
   event: AgentStatusEvent
 ): Promise<void> {
-  await enqueueRunWrite(runId, async () => {
-    const run = await readRun(runId);
-    if (run) {
-      run.events.push(event);
-      if (event.status === "done" && event.output !== undefined) {
-        run.agent_outputs = {
-          ...run.agent_outputs,
-          [event.agent]: event.output,
-        };
-      }
-      run.updated_at = new Date().toISOString();
-      await writeRun(run);
+  let record = liveRuns.get(runId);
+  if (!record) {
+    const fresh = await readFresh(runId);
+    if (fresh) record = ownRecord(fresh);
+  }
+
+  if (record) {
+    record.events.push(event);
+    if (event.status === "done" && event.output !== undefined) {
+      record.agent_outputs = {
+        ...record.agent_outputs,
+        [event.agent]: event.output,
+      };
     }
-  });
+    record.updated_at = new Date().toISOString();
+    scheduleFlush(runId);
+  }
+
   notifyListeners(runId, { type: "status", data: event });
 }
 
@@ -164,14 +226,18 @@ export async function appendLog(
   runId: string,
   log: AgentLogEvent
 ): Promise<void> {
-  await enqueueRunWrite(runId, async () => {
-    const run = await readRun(runId);
-    if (run) {
-      run.logs.push(log);
-      run.updated_at = new Date().toISOString();
-      await writeRun(run);
-    }
-  });
+  let record = liveRuns.get(runId);
+  if (!record) {
+    const fresh = await readFresh(runId);
+    if (fresh) record = ownRecord(fresh);
+  }
+
+  if (record) {
+    record.logs.push(log);
+    record.updated_at = new Date().toISOString();
+    scheduleFlush(runId);
+  }
+
   notifyListeners(runId, { type: "log", data: log });
 }
 
@@ -189,11 +255,11 @@ export function subscribeToRun(
 }
 
 export async function getRunEvents(runId: string): Promise<AgentStatusEvent[]> {
-  const run = await readRun(runId);
+  const run = await readFresh(runId);
   return run?.events ?? [];
 }
 
 export async function getRunLogs(runId: string): Promise<AgentLogEvent[]> {
-  const run = await readRun(runId);
+  const run = await readFresh(runId);
   return run?.logs ?? [];
 }

@@ -11,6 +11,46 @@ import { SwarmSetupStepper } from "@/components/home/swarm-setup-stepper";
 import { SwarmChatDemo } from "@/components/home/swarm-chat-demo";
 import { SwarmGraphPreview } from "@/components/home/swarm-graph-preview";
 
+type PresetInput = { company: string; product: string; url: string };
+
+// Pre-baked showcase companies. These match the server-side demo datasets and
+// replay instantly (no LLM), so the demo is fast and deterministic.
+const DEMO_PRESETS: { id: string; label: string; tagline: string; input: PresetInput }[] = [
+  {
+    id: "microsoft",
+    label: "Microsoft",
+    tagline: "Azure + Copilot",
+    input: {
+      company: "Microsoft",
+      product:
+        "Microsoft Azure cloud platform and Microsoft Copilot AI assistant — cloud migration, a unified data estate (Microsoft Fabric), and org-wide generative AI productivity for the enterprise",
+      url: "https://azure.microsoft.com",
+    },
+  },
+  {
+    id: "apple",
+    label: "Apple",
+    tagline: "Apple at Work",
+    input: {
+      company: "Apple",
+      product:
+        "Apple at Work — Mac, iPhone, and iPad for the enterprise with Apple Business Manager, employee-choice programs, zero-touch deployment, and built-in security",
+      url: "https://www.apple.com/business/",
+    },
+  },
+  {
+    id: "spacex",
+    label: "SpaceX",
+    tagline: "Starlink + Starshield",
+    input: {
+      company: "SpaceX",
+      product:
+        "Starlink high-speed, low-latency satellite connectivity for enterprise, maritime, aviation, and government — plus Starshield secure comms and Falcon 9 launch services",
+      url: "https://www.starlink.com",
+    },
+  },
+];
+
 export default function HomePage() {
   const router = useRouter();
   const [company, setCompany] = useState("");
@@ -30,8 +70,7 @@ export default function HomePage() {
     document.getElementById("launch-form")?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function startRun(payload: PresetInput) {
     setLoading(true);
     setError(null);
 
@@ -39,7 +78,11 @@ export default function HomePage() {
       const res = await fetch("/api/report/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ company, product, url: url || undefined }),
+        body: JSON.stringify({
+          company: payload.company,
+          product: payload.product,
+          url: payload.url || undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -53,6 +96,18 @@ export default function HomePage() {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setLoading(false);
     }
+  }
+
+  function launchPreset(preset: PresetInput) {
+    setCompany(preset.company);
+    setProduct(preset.product);
+    setUrl(preset.url);
+    void startRun(preset);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await startRun({ company, product, url });
   }
 
   return (
@@ -96,17 +151,40 @@ export default function HomePage() {
                   id="launch-form"
                   className="border-4 border-black bg-white/90 backdrop-blur-sm p-6 md:p-8 brutalist-shadow-lg"
                 >
-                  <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-                    <h2 className="text-lg font-black uppercase tracking-tight text-[#0A0A0A]">
-                      Launch GTMaxxin
-                    </h2>
-                    <button
-                      type="button"
-                      onClick={loadDemoInput}
-                      className="border-2 border-black bg-[#FCD116] px-3 py-1 text-[10px] font-black uppercase tracking-wide text-[#0A0A0A] transition-colors hover:bg-black hover:text-[#FCD116]"
-                    >
-                      Load demo
-                    </button>
+                  <div className="mb-4 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h2 className="text-lg font-black uppercase tracking-tight text-[#0A0A0A]">
+                        Launch GTMaxxin
+                      </h2>
+                      <button
+                        type="button"
+                        onClick={loadDemoInput}
+                        className="border-2 border-black bg-white px-3 py-1 text-[10px] font-black uppercase tracking-wide text-[#0A0A0A] transition-colors hover:bg-black hover:text-[#FCD116]"
+                      >
+                        Load demo
+                      </button>
+                    </div>
+                    <p className="text-[10px] font-black uppercase tracking-wide text-neutral-500">
+                      Instant demo — pick a company
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {DEMO_PRESETS.map((preset) => (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => launchPreset(preset.input)}
+                          disabled={loading}
+                          className="flex flex-col items-start border-2 border-black bg-[#FCD116] px-2.5 py-1.5 text-left transition-colors hover:bg-black hover:text-[#FCD116] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <span className="text-xs font-black uppercase tracking-tight">
+                            {preset.label}
+                          </span>
+                          <span className="text-[9px] font-bold uppercase tracking-wide opacity-70">
+                            {preset.tagline}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4">

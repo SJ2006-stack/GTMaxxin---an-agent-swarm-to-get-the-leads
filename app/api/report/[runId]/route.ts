@@ -73,7 +73,7 @@ export async function GET(
       agent_statuses: run.state.agent_statuses,
       agent_outputs: run.agent_outputs ?? {},
       langsmith_trace_url: run.state.langsmith_trace_url,
-      demo_mode: isMockLLM(),
+      demo_mode: run.demo_mode ?? isMockLLM(),
       events,
       logs,
     });

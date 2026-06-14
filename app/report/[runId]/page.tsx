@@ -11,7 +11,7 @@ import {
   ArrowLeft,
   ExternalLink,
 } from "lucide-react";
-import { AgentFlowGraph } from "@/components/swarm/agent-flow-graph";
+import { AgentFlowGraph } from "@/components/swarm/agent-flow-graph-dynamic";
 import { AgentActivityLog } from "@/components/swarm/agent-activity-log";
 import { PipelineInspector } from "@/components/swarm/pipeline-inspector";
 import { InputSummary } from "@/components/report/input-summary";

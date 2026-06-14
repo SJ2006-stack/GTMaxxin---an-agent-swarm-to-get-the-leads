@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AgentFlowGraph } from "@/components/swarm/agent-flow-graph";
+import { AgentFlowGraph } from "@/components/swarm/agent-flow-graph-dynamic";
 import {
   AGENT_NAMES,
   createInitialAgentStatuses,

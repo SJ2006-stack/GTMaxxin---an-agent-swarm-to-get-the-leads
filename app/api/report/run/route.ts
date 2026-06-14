@@ -4,6 +4,8 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { KVNamespace } from "@cloudflare/workers-types";
 import { GTMInputSchema } from "@/types/gtm";
 import { runSwarmGraph } from "@/swarm/graph";
+import { runDemoReplay } from "@/swarm/demo-runner";
+import { resolveDemoCompany } from "@/fixtures/demo-companies";
 import { createRun, updateRun, appendEvent, appendLog, bindRunsKV } from "@/server/runs/store";
 import type { SwarmStreamEvent } from "@/swarm/events";
 
@@ -32,18 +34,28 @@ export async function POST(request: NextRequest) {
       bindRunsKV(null);
     }
 
+    // Pre-baked demo companies (Microsoft, Apple, SpaceX) replay instantly
+    // without any LLM/tool calls, so the demo is fast and deterministic.
+    const demoCompany = resolveDemoCompany(input);
+
     await createRun(runId);
-    await updateRun(runId, { status: "running" });
+    await updateRun(runId, { status: "running", demo_mode: demoCompany !== null });
 
     const pendingEvents: Promise<void>[] = [];
 
-    const runPromise = runSwarmGraph(runId, input, (event: SwarmStreamEvent) => {
+    const emit = (event: SwarmStreamEvent) => {
       if (event.type === "status") {
         pendingEvents.push(appendEvent(runId, event.data));
       } else {
         pendingEvents.push(appendLog(runId, event.data));
       }
-    })
+    };
+
+    const execute = demoCompany
+      ? runDemoReplay(runId, demoCompany, emit)
+      : runSwarmGraph(runId, input, emit);
+
+    const runPromise = execute
       .then(async (finalState) => {
         await Promise.all(pendingEvents);
         await updateRun(runId, {
