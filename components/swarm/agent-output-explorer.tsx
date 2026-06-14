@@ -19,7 +19,7 @@ type Props = {
 
 function OutputPreview({ agent, output }: { agent: AgentName; output: unknown }) {
   if (!output || typeof output !== "object") {
-    return <p className="text-sm text-gray-500">No output data.</p>;
+    return <p className="text-sm text-neutral-400">No output data.</p>;
   }
 
   const data = output as Record<string, unknown>;
@@ -28,9 +28,9 @@ function OutputPreview({ agent, output }: { agent: AgentName; output: unknown })
     return (
       <ul className="space-y-2">
         {(data.icps as Array<{ name: string; description: string }>).map((icp) => (
-          <li key={icp.name} className="text-sm border-l-2 border-blue-400 pl-3">
-            <p className="font-medium text-gray-900">{icp.name}</p>
-            <p className="text-gray-600">{icp.description}</p>
+          <li key={icp.name} className="text-sm border-l-2 border-blue-500 pl-3">
+            <p className="font-medium text-neutral-100">{icp.name}</p>
+            <p className="text-neutral-400">{icp.description}</p>
           </li>
         ))}
       </ul>
@@ -44,10 +44,10 @@ function OutputPreview({ agent, output }: { agent: AgentName; output: unknown })
           (p) => (
             <li
               key={p.company_name}
-              className="flex justify-between text-sm border-b border-gray-100 pb-2"
+              className="flex justify-between text-sm border-b border-neutral-800 pb-2"
             >
-              <span className="font-medium">{p.company_name}</span>
-              <span className="text-gray-500">
+              <span className="font-medium text-neutral-200">{p.company_name}</span>
+              <span className="text-neutral-400">
                 {p.industry} · {p.fit_score}% fit
               </span>
             </li>
@@ -65,18 +65,18 @@ function OutputPreview({ agent, output }: { agent: AgentName; output: unknown })
             <li key={i} className="text-sm">
               <span
                 className={cn(
-                  "inline-block px-1.5 py-0.5 rounded text-xs mr-2",
+                  "inline-block px-1.5 py-0.5 rounded text-xs mr-2 border",
                   s.urgency === "high"
-                    ? "bg-red-100 text-red-700"
+                    ? "bg-red-950/40 text-red-400 border-red-900/50"
                     : s.urgency === "medium"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-gray-100 text-gray-600"
+                      ? "bg-yellow-950/40 text-yellow-400 border-yellow-900/50"
+                      : "bg-neutral-800 text-neutral-400 border-neutral-700"
                 )}
               >
                 {s.urgency}
               </span>
-              <span className="font-medium">{s.signal_type}</span>
-              <p className="text-gray-600 mt-0.5">{s.description}</p>
+              <span className="font-medium text-neutral-200">{s.signal_type}</span>
+              <p className="text-neutral-400 mt-0.5">{s.description}</p>
             </li>
           )
         )}
@@ -90,8 +90,8 @@ function OutputPreview({ agent, output }: { agent: AgentName; output: unknown })
         {(data.outreach_strategies as Array<{ company_name: string; outreach_angle: string }>).map(
           (s) => (
             <li key={s.company_name} className="text-sm">
-              <p className="font-medium text-gray-900">{s.company_name}</p>
-              <p className="text-gray-600">{s.outreach_angle}</p>
+              <p className="font-medium text-neutral-100">{s.company_name}</p>
+              <p className="text-neutral-400">{s.outreach_angle}</p>
             </li>
           )
         )}
@@ -100,11 +100,11 @@ function OutputPreview({ agent, output }: { agent: AgentName; output: unknown })
   }
 
   if (agent === "report_assembler" && typeof data.summary === "string") {
-    return <p className="text-sm text-gray-700 leading-relaxed">{data.summary}</p>;
+    return <p className="text-sm text-neutral-300 leading-relaxed">{data.summary}</p>;
   }
 
   return (
-    <pre className="text-xs bg-gray-50 border rounded p-3 overflow-x-auto text-gray-800">
+    <pre className="text-xs bg-neutral-950 border border-neutral-800 rounded p-3 overflow-x-auto text-neutral-300">
       {JSON.stringify(output, null, 2)}
     </pre>
   );
@@ -129,22 +129,22 @@ export function AgentOutputExplorer({
   const status = agentStatuses[active];
 
   return (
-    <section className="rounded-lg border border-gray-200 bg-white overflow-hidden">
-      <div className="px-4 py-3 border-b bg-gray-50 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Agent Outputs</h2>
-        <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
+    <section className="rounded-lg border border-neutral-800 bg-neutral-900/40 overflow-hidden">
+      <div className="px-4 py-3 border-b border-neutral-800 bg-neutral-900/80 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold text-white">Agent Outputs</h2>
+        <label className="flex items-center gap-2 text-xs text-neutral-400 cursor-pointer">
           <input
             type="checkbox"
             checked={showRaw}
             onChange={(e) => setShowRaw(e.target.checked)}
-            className="rounded"
+            className="rounded border-neutral-700 bg-neutral-900 text-blue-600"
           />
           Show raw JSON
         </label>
       </div>
 
       <div className="grid lg:grid-cols-[240px_1fr] min-h-[320px]">
-        <div className="border-b lg:border-b-0 lg:border-r border-gray-200 p-2 space-y-1 max-h-[360px] overflow-y-auto">
+        <div className="border-b lg:border-b-0 lg:border-r border-neutral-800 p-2 space-y-1 max-h-[360px] overflow-y-auto">
           {AGENT_NAMES.map((agent) => {
             const hasOutput = agentOutputs[agent] !== undefined;
             const agentStatus = agentStatuses[agent];
@@ -157,8 +157,8 @@ export function AgentOutputExplorer({
                 className={cn(
                   "w-full text-left px-3 py-2 rounded-md text-sm transition-colors flex items-center gap-2",
                   active === agent
-                    ? "bg-blue-50 text-blue-900 ring-1 ring-blue-200"
-                    : "hover:bg-gray-50 text-gray-700",
+                    ? "bg-neutral-800 text-white ring-1 ring-blue-500/30"
+                    : "hover:bg-neutral-800/40 text-neutral-300",
                   !hasOutput && agentStatus === "pending" && "opacity-50"
                 )}
               >
@@ -171,17 +171,17 @@ export function AgentOutputExplorer({
 
         <div className="p-4 overflow-y-auto max-h-[360px]">
           <div className="flex items-center gap-2 mb-3">
-            <h3 className="font-medium text-gray-900">{AGENT_LABELS[active]}</h3>
+            <h3 className="font-medium text-white">{AGENT_LABELS[active]}</h3>
             <span
               className={cn(
-                "text-xs px-2 py-0.5 rounded-full capitalize",
+                "text-xs px-2 py-0.5 rounded-full capitalize border",
                 status === "done"
-                  ? "bg-green-100 text-green-700"
+                  ? "bg-emerald-950/40 text-emerald-400 border-emerald-900/50"
                   : status === "running"
-                    ? "bg-blue-100 text-blue-700"
+                    ? "bg-blue-950/40 text-blue-400 border-blue-900/50"
                     : status === "error"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-600"
+                      ? "bg-red-950/40 text-red-400 border-red-900/50"
+                      : "bg-neutral-800 text-neutral-400 border-neutral-700"
               )}
             >
               {status}
@@ -189,7 +189,7 @@ export function AgentOutputExplorer({
           </div>
 
           {!output && status !== "done" && (
-            <p className="text-sm text-gray-500 italic">
+            <p className="text-sm text-neutral-400 italic">
               {status === "running"
                 ? "Agent is working… output will appear when complete."
                 : "Output not available yet."}
@@ -201,7 +201,7 @@ export function AgentOutputExplorer({
           )}
 
           {output !== undefined && showRaw && (
-            <pre className="text-xs bg-gray-950 text-green-400 rounded p-4 overflow-x-auto">
+            <pre className="text-xs bg-neutral-950 text-emerald-400 rounded border border-neutral-800 p-4 overflow-x-auto">
               {JSON.stringify(output, null, 2)}
             </pre>
           )}

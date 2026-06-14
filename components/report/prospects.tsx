@@ -16,11 +16,11 @@ function formatWebsiteUrl(website: string): string {
 function ScoreBar({ label, score }: { label: string; score: number }) {
   return (
     <div className="space-y-1">
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className="flex justify-between text-xs text-neutral-400">
         <span>{label}</span>
         <span>{score}%</span>
       </div>
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-neutral-800 rounded-full overflow-hidden">
         <div
           className="h-full bg-blue-500 rounded-full"
           style={{ width: `${score}%` }}
@@ -31,9 +31,9 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
 }
 
 function priorityBadgeClass(priority: OpportunityScore["priority"]) {
-  if (priority === "high") return "bg-green-100 text-green-700";
-  if (priority === "medium") return "bg-yellow-100 text-yellow-700";
-  return "bg-gray-100 text-gray-600";
+  if (priority === "high") return "bg-emerald-950/40 text-emerald-400 border border-emerald-900/50";
+  if (priority === "medium") return "bg-amber-950/40 text-amber-400 border border-amber-900/50";
+  return "bg-neutral-800 text-neutral-400 border border-neutral-700";
 }
 
 export function ProspectsReportSection({
@@ -45,7 +45,7 @@ export function ProspectsReportSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">Qualified Prospects</h2>
+      <h2 className="text-xl font-semibold text-white">Qualified Prospects</h2>
       <div className="space-y-2">
         {prospects.map((p) => {
           const opp = opportunities.find((o) => o.company_name === p.company_name);
@@ -53,72 +53,72 @@ export function ProspectsReportSection({
           const isOpen = expanded === p.company_name;
 
           return (
-            <div key={p.company_name} className="border rounded-lg overflow-hidden">
+            <div key={p.company_name} className="border border-neutral-800 rounded-lg overflow-hidden">
               <button
                 type="button"
                 onClick={() =>
                   setExpanded(isOpen ? null : p.company_name)
                 }
-                className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
+                className="w-full text-left px-4 py-3 hover:bg-neutral-900/40 transition-colors"
               >
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-                  <span className="font-medium text-gray-900">{p.company_name}</span>
-                  <span className="text-gray-500">{p.industry}</span>
+                  <span className="font-semibold text-white">{p.company_name}</span>
+                  <span className="text-neutral-400">{p.industry}</span>
                   {p.website && (
                     <a
                       href={formatWebsiteUrl(p.website)}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
                     >
                       {p.website.replace(/^https?:\/\//, "")}
                     </a>
                   )}
-                  <span className="text-gray-600">Fit {p.fit_score}%</span>
+                  <span className="text-neutral-300">Fit {p.fit_score}%</span>
                   {opp && (
                     <span
-                      className={`px-2 py-0.5 rounded text-xs ${priorityBadgeClass(opp.priority)}`}
+                      className={`px-2 py-0.5 rounded border text-xs ${priorityBadgeClass(opp.priority)}`}
                     >
                       {opp.priority} ({opp.overall_score})
                     </span>
                   )}
                   {dm && (
-                    <span className="text-gray-500 truncate max-w-[200px]">
+                    <span className="text-neutral-400 truncate max-w-[200px]">
                       {dm.title}
                     </span>
                   )}
-                  <span className="ml-auto text-gray-400 text-xs">
+                  <span className="ml-auto text-neutral-500 text-xs">
                     {isOpen ? "▲ Hide" : "▼ Details"}
                   </span>
                 </div>
               </button>
 
               {isOpen && (
-                <div className="px-4 pb-4 pt-1 border-t bg-gray-50 space-y-4 text-sm">
+                <div className="px-4 pb-4 pt-3 border-t border-neutral-800 bg-neutral-900/30 space-y-4 text-sm">
                   <div className="grid gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-gray-500 uppercase">
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide">
                         ICP Match
                       </p>
-                      <p className="text-gray-700">{p.icp_match}</p>
+                      <p className="text-neutral-300 leading-relaxed">{p.icp_match}</p>
                     </div>
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-gray-500 uppercase">
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide">
                         Match Rationale
                       </p>
-                      <p className="text-gray-700">{p.match_rationale}</p>
+                      <p className="text-neutral-300 leading-relaxed">{p.match_rationale}</p>
                     </div>
                   </div>
 
                   {opp && (
-                    <div className="p-3 bg-white border rounded-lg space-y-3">
+                    <div className="p-3 bg-neutral-900/50 border border-neutral-800 rounded-lg space-y-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-xs font-medium text-gray-500 uppercase">
+                        <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide">
                           Opportunity Score
                         </p>
                         <span
-                          className={`px-2 py-0.5 rounded text-xs ${priorityBadgeClass(opp.priority)}`}
+                          className={`px-2 py-0.5 rounded border text-xs ${priorityBadgeClass(opp.priority)}`}
                         >
                           {opp.priority} priority · {opp.overall_score} overall
                         </span>
@@ -129,25 +129,25 @@ export function ProspectsReportSection({
                         <ScoreBar label="Timing" score={opp.timing_score} />
                         <ScoreBar label="Accessibility" score={opp.accessibility_score} />
                       </div>
-                      <p className="text-gray-600 text-xs">{opp.rationale}</p>
+                      <p className="text-neutral-400 text-xs mt-1">{opp.rationale}</p>
                     </div>
                   )}
 
                   {dm && (
-                    <div className="p-3 bg-white border rounded-lg space-y-2">
-                      <p className="text-xs font-medium text-gray-500 uppercase">
+                    <div className="p-3 bg-neutral-900/50 border border-neutral-800 rounded-lg space-y-2">
+                      <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wide">
                         Decision Maker
                       </p>
-                      <p className="font-medium text-gray-900">{dm.title}</p>
-                      <p className="text-gray-600">
-                        <span className="font-medium text-gray-700">Role:</span> {dm.role}
+                      <p className="font-semibold text-white">{dm.title}</p>
+                      <p className="text-neutral-300">
+                        <span className="font-medium text-neutral-400">Role:</span> {dm.role}
                       </p>
-                      <p className="text-gray-600">
-                        <span className="font-medium text-gray-700">Relevance:</span>{" "}
+                      <p className="text-neutral-300">
+                        <span className="font-medium text-neutral-400">Relevance:</span>{" "}
                         {dm.relevance}
                       </p>
-                      <p className="text-gray-600">
-                        <span className="font-medium text-gray-700">Approach:</span>{" "}
+                      <p className="text-neutral-300">
+                        <span className="font-medium text-neutral-400">Approach:</span>{" "}
                         {dm.recommended_approach}
                       </p>
                     </div>

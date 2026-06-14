@@ -1,1 +1,235 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui;
+  --font-display: var(--font-syne), ui-sans-serif, system-ui;
+  --color-yellow-mustard: #FCD116;
+  --color-matte-black: #0A0A0A;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+::-webkit-scrollbar-thumb {
+  background: #FCD116;
+  border: 3px solid #0A0A0A;
+}
+
+/* Global Font Overrides */
+body {
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-syne), sans-serif;
+  font-weight: 800;
+}
+
+/* Brutalist Custom Styles */
+.brutalist-border {
+  border: 4px solid #0A0A0A;
+}
+
+.brutalist-border-thick {
+  border: 8px solid #0A0A0A;
+}
+
+.brutalist-shadow {
+  box-shadow: 6px 6px 0px 0px #0A0A0A;
+}
+
+.brutalist-shadow-lg {
+  box-shadow: 12px 12px 0px 0px #0A0A0A;
+}
+
+.brutalist-shadow-yellow {
+  box-shadow: 6px 6px 0px 0px #FCD116;
+}
+
+.brutalist-shadow-yellow-lg {
+  box-shadow: 12px 12px 0px 0px #FCD116;
+}
+
+/* Button hover offsets */
+.brutalist-btn-hover {
+  transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.brutalist-btn-hover:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px 0px #0A0A0A;
+}
+
+.brutalist-btn-hover:active {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px 0px #0A0A0A;
+}
+
+.brutalist-btn-hover-yellow:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px 0px #FCD116;
+}
+
+.brutalist-btn-hover-yellow:active {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0px 0px #FCD116;
+}
+
+/* ==========================================
+   BRUTALIST GTM INTELLIGENCE REPORT STYLING
+   ========================================== */
+
+/* Overrides for child components in report details */
+.brutalist-report {
+  color: #0A0A0A !important;
+}
+
+.brutalist-report h2,
+.brutalist-report h3,
+.brutalist-report h4 {
+  color: #0A0A0A !important;
+  font-family: var(--font-syne), sans-serif;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+/* Target and styled boxes inside child components */
+.brutalist-report .bg-neutral-900\/30,
+.brutalist-report .bg-neutral-900\/50,
+.brutalist-report .bg-neutral-900\/40,
+.brutalist-report .bg-blue-950\/20,
+.brutalist-report .bg-blue-950\/40,
+.brutalist-report .bg-emerald-950\/20,
+.brutalist-report .bg-emerald-950\/40,
+.brutalist-report .bg-amber-950\/20,
+.brutalist-report .bg-amber-950\/40,
+.brutalist-report .bg-red-950\/20,
+.brutalist-report .bg-red-950\/40,
+.brutalist-report .border-neutral-800,
+.brutalist-report .border-neutral-700,
+.brutalist-report .border-blue-900\/30,
+.brutalist-report .border-blue-900\/50,
+.brutalist-report .border-emerald-900\/50,
+.brutalist-report .border-amber-900\/50,
+.brutalist-report .border-red-900\/50,
+.brutalist-report .border-t,
+.brutalist-report .px-4.pb-4.pt-3 {
+  background-color: #ffffff !important;
+  color: #0A0A0A !important;
+  border: 4px solid #0A0A0A !important;
+  box-shadow: 5px 5px 0px 0px #0A0A0A !important;
+  border-radius: 0px !important;
+  opacity: 1 !important;
+}
+
+/* Override inner text colors inside report components */
+.brutalist-report .text-neutral-400,
+.brutalist-report .text-neutral-300,
+.brutalist-report .text-neutral-200,
+.brutalist-report .text-neutral-500,
+.brutalist-report .text-gray-500,
+.brutalist-report .text-blue-400,
+.brutalist-report .text-emerald-400,
+.brutalist-report .text-amber-400,
+.brutalist-report .text-red-400,
+.brutalist-report .text-white {
+  color: #0A0A0A !important;
+}
+
+/* Badges styling */
+.brutalist-report span.bg-blue-950\/40,
+.brutalist-report span.bg-emerald-950\/40,
+.brutalist-report span.bg-amber-950\/40,
+.brutalist-report span.bg-red-950\/40,
+.brutalist-report span.bg-neutral-800 {
+  background-color: #FCD116 !important;
+  color: #0A0A0A !important;
+  border: 2px solid #0A0A0A !important;
+  border-radius: 0px !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+}
+
+.brutalist-report hr,
+.brutalist-report .border-t {
+  border-color: #0A0A0A !important;
+  border-width: 2px !important;
+}
+
+
+
+/* Explorer tab outputs overrides */
+.brutalist-report-explorer section {
+  border: 4px solid #0A0A0A !important;
+  background-color: #ffffff !important;
+  color: #0A0A0A !important;
+  border-radius: 0px !important;
+  box-shadow: 6px 6px 0px 0px #0A0A0A !important;
+}
+
+.brutalist-report-explorer .border-b,
+.brutalist-report-explorer .border-neutral-800 {
+  border-color: #0A0A0A !important;
+}
+
+.brutalist-report-explorer .bg-neutral-900\/80 {
+  background-color: #ffffff !important;
+  border-bottom: 4px solid #0A0A0A !important;
+}
+
+.brutalist-report-explorer .bg-neutral-900\/40 {
+  background-color: #ffffff !important;
+}
+
+.brutalist-report-explorer h2,
+.brutalist-report-explorer h3,
+.brutalist-report-explorer font-semibold {
+  color: #0A0A0A !important;
+  font-family: var(--font-syne), sans-serif;
+  text-transform: uppercase;
+}
+
+.brutalist-report-explorer button {
+  border-radius: 0px !important;
+}
+
+.brutalist-report-explorer button.bg-neutral-800 {
+  background-color: #FCD116 !important;
+  color: #0A0A0A !important;
+  border: 2px solid #0A0A0A !important;
+  font-weight: 800;
+}
+
+.brutalist-report-explorer pre {
+  background-color: #0A0A0A !important;
+  color: #86EFAC !important; /* green text for raw JSON output */
+  border: 4px solid #0A0A0A !important;
+  border-radius: 0px !important;
+}
+
+/* Infinite Marquee for Core Engine Cards */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-container {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 50s linear infinite;
+}
+
+.animate-marquee-container:hover {
+  animation-play-state: paused;
+}
+
+

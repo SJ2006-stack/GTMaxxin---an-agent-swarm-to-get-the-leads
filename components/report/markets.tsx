@@ -9,11 +9,11 @@ type Props = {
 function opportunityBadgeClass(size: MarketSegment["opportunity_size"]) {
   switch (size) {
     case "large":
-      return "bg-green-100 text-green-700";
+      return "bg-emerald-950/40 text-emerald-400 border border-emerald-900/50";
     case "medium":
-      return "bg-yellow-100 text-yellow-700";
+      return "bg-amber-950/40 text-amber-400 border border-amber-900/50";
     case "small":
-      return "bg-gray-100 text-gray-600";
+      return "bg-neutral-800 text-neutral-400 border border-neutral-700";
   }
 }
 
@@ -28,20 +28,20 @@ function MarketGroup({
 
   return (
     <div className="space-y-3">
-      <h3 className="font-medium text-gray-800">{title}</h3>
+      <h3 className="font-medium text-neutral-300">{title}</h3>
       <div className="grid gap-4 md:grid-cols-2">
         {markets.map((market) => (
           <div
             key={market.name}
-            className="p-4 border rounded-lg flex justify-between items-start gap-3"
+            className="p-4 border border-neutral-800 bg-neutral-900/30 rounded-lg flex justify-between items-start gap-3"
           >
             <div className="min-w-0">
-              <h4 className="font-medium">{market.name}</h4>
-              <p className="text-sm text-gray-600 mt-1">{market.description}</p>
-              <p className="text-sm text-gray-500 mt-2">{market.rationale}</p>
+              <h4 className="font-medium text-white">{market.name}</h4>
+              <p className="text-sm text-neutral-400 mt-1">{market.description}</p>
+              <p className="text-xs text-neutral-500 mt-2">{market.rationale}</p>
             </div>
             <span
-              className={`shrink-0 text-xs px-2 py-1 rounded capitalize ${opportunityBadgeClass(market.opportunity_size)}`}
+              className={`shrink-0 text-xs px-2 py-1 rounded border capitalize ${opportunityBadgeClass(market.opportunity_size)}`}
             >
               {market.opportunity_size}
             </span>
@@ -66,7 +66,7 @@ export function MarketsReportSection({
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">Market Segments</h2>
+      <h2 className="text-xl font-semibold text-white">Market Segments</h2>
       <MarketGroup title="Primary Markets" markets={primaryMarkets} />
       <MarketGroup title="Secondary Markets" markets={secondaryMarkets} />
       <MarketGroup title="Adjacent Markets" markets={adjacentMarkets} />

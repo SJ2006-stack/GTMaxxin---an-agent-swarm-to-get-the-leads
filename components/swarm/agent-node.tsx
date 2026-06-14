@@ -12,10 +12,10 @@ export type AgentNodeData = {
 };
 
 const statusStyles: Record<AgentStatus, string> = {
-  pending: "border-gray-300 bg-gray-50 text-gray-500",
-  running: "border-blue-500 bg-blue-50 text-blue-700 animate-pulse",
-  done: "border-green-500 bg-green-50 text-green-700",
-  error: "border-red-500 bg-red-50 text-red-700",
+  pending: "border-neutral-700 bg-[#0A0A0A] border-2",
+  running: "border-blue-500 bg-[#0A0A0A] border-4 shadow-[3px_3px_0px_0px_#3b82f6] animate-pulse",
+  done: "border-emerald-500 bg-[#0A0A0A] border-4 shadow-[3px_3px_0px_0px_#10b981]",
+  error: "border-red-500 bg-[#0A0A0A] border-4 shadow-[3px_3px_0px_0px_#ef4444]",
 };
 
 const statusIcons: Record<AgentStatus, string> = {
@@ -31,17 +31,18 @@ function AgentNodeComponent({ data }: NodeProps & { data: AgentNodeData }) {
   return (
     <div
       className={cn(
-        "px-4 py-3 rounded-lg border-2 shadow-sm min-w-[160px] text-center text-sm font-medium transition-all duration-300 cursor-pointer",
+        "px-4 py-3 rounded-none text-center text-sm font-black transition-all duration-300 cursor-pointer text-white",
         statusStyles[data.status],
-        data.selected && "ring-2 ring-blue-400 ring-offset-2 scale-105"
+        data.selected && "ring-4 ring-[#FCD116] ring-offset-[#0A0A0A] scale-105"
       )}
+      style={{ color: "#ffffff" }}
     >
-      <Handle type="target" position={Position.Top} className="!bg-gray-400" />
-      <div className="flex items-center justify-center gap-2">
-        <span>{statusIcons[data.status]}</span>
-        <span>{label}</span>
+      <Handle type="target" position={Position.Top} className="!bg-neutral-700" />
+      <div className="flex items-center justify-center gap-2 text-white" style={{ color: "#ffffff" }}>
+        <span className="text-white" style={{ color: "#ffffff" }}>{statusIcons[data.status]}</span>
+        <span className="text-white" style={{ color: "#ffffff" }}>{label}</span>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
+      <Handle type="source" position={Position.Bottom} className="!bg-neutral-700" />
     </div>
   );
 }

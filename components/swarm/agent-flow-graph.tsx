@@ -37,18 +37,18 @@ const GRAPH_NODES: { id: AgentName; x: number; y: number }[] = [
 ];
 
 const GRAPH_EDGES: Edge[] = [
-  { id: "e1", source: "input_processor", target: "gtm_strategist", animated: true },
-  { id: "e2", source: "gtm_strategist", target: "market_mapper", animated: true },
-  { id: "e3", source: "gtm_strategist", target: "signal_hunter", animated: true },
-  { id: "e4", source: "market_mapper", target: "join_research" },
-  { id: "e5", source: "signal_hunter", target: "join_research" },
-  { id: "e6", source: "join_research", target: "prospect_discovery", animated: true },
-  { id: "e7", source: "prospect_discovery", target: "decision_maker_finder", animated: true },
-  { id: "e8", source: "prospect_discovery", target: "opportunity_scorer", animated: true },
-  { id: "e9", source: "decision_maker_finder", target: "join_qualify" },
-  { id: "e10", source: "opportunity_scorer", target: "join_qualify" },
-  { id: "e11", source: "join_qualify", target: "outreach_planner", animated: true },
-  { id: "e12", source: "outreach_planner", target: "report_assembler", animated: true },
+  { id: "e1", source: "input_processor", target: "gtm_strategist", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e2", source: "gtm_strategist", target: "market_mapper", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e3", source: "gtm_strategist", target: "signal_hunter", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e4", source: "market_mapper", target: "join_research", type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e5", source: "signal_hunter", target: "join_research", type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e6", source: "join_research", target: "prospect_discovery", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e7", source: "prospect_discovery", target: "decision_maker_finder", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e8", source: "prospect_discovery", target: "opportunity_scorer", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e9", source: "decision_maker_finder", target: "join_qualify", type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e10", source: "opportunity_scorer", target: "join_qualify", type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e11", source: "join_qualify", target: "outreach_planner", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
+  { id: "e12", source: "outreach_planner", target: "report_assembler", animated: true, type: "straight", style: { stroke: "#ffffff", strokeWidth: 3 } },
 ];
 
 export function AgentFlowGraph({
@@ -72,7 +72,7 @@ export function AgentFlowGraph({
   );
 
   return (
-    <div className="h-[500px] w-full rounded-lg border border-gray-200 bg-white">
+    <div className="h-[800px] w-full border-4 border-black bg-[#0A0A0A]">
       <ReactFlow
         nodes={nodes}
         edges={GRAPH_EDGES}
@@ -85,9 +85,9 @@ export function AgentFlowGraph({
         panOnScroll
         onNodeClick={(_, node) => onSelectAgent?.(node.id as AgentName)}
       >
-        <Background />
-        <Controls showInteractive={false} />
-        <MiniMap />
+        <Background color="#222" gap={16} />
+        <Controls showInteractive={false} className="bg-[#0A0A0A] border-2 border-black text-[#FCD116] fill-current rounded-none" />
+        <MiniMap className="bg-[#0A0A0A] border-2 border-black rounded-none" maskColor="rgba(0, 0, 0, 0.6)" />
       </ReactFlow>
     </div>
   );
