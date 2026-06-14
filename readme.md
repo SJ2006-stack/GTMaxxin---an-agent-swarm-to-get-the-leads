@@ -337,3 +337,10 @@ This demonstrates true multi-agent orchestration and swarm intelligence.
 * GTM knowledge graph
 * Competitive intelligence agent
 * Revenue forecasting agent
+
+---
+
+## Environment Setup
+
+Copy `.env.example` to `.env.local` and fill in your API keys there. Never commit secrets to version control.
+
