@@ -251,12 +251,15 @@ export default function ReportPage({
               <SignalsReportSection
                 signals={report.market_signals}
                 intentIndicators={report.intent_indicators}
+                onJumpToAgent={setSelectedAgent}
               />
 
               <ProspectsReportSection
                 prospects={report.prospects}
                 opportunities={report.ranked_opportunities}
                 decisionMakers={report.decision_makers}
+                outreachStrategies={report.outreach_strategies}
+                onJumpToAgent={setSelectedAgent}
               />
 
               <OutreachReportSection strategies={report.outreach_strategies} />
