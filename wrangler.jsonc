@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "gtmaxxin",
+  "name": "prospect-swarm",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-06-13",
   "compatibility_flags": ["nodejs_compat"],
